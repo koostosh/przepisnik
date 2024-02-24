@@ -1,0 +1,20 @@
+{
+    "name": "przepisnik",
+    "version": "0.1.0",
+    "dependencies":
+    [
+        {
+            "name": "imgui",
+            "features": [
+                "sdl2-binding",
+                "docking-experimental",
+                "wchar32",
+                "win32-binding",
+                "freetype",
+                "dx11-binding"
+            ]
+        },
+        "sdl2",
+        "nlohmann-json"
+    ]
+  }
