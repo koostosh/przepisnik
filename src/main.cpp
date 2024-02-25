@@ -9,6 +9,8 @@
 #include <SDL.h>
 #include <SDL_syswm.h>
 
+#include <fstream>
+
 // Data
 static ID3D11Device * g_pd3dDevice = nullptr;
 static ID3D11DeviceContext * g_pd3dDeviceContext = nullptr;
@@ -25,6 +27,9 @@ void CleanupRenderTarget();
 int main( int, char ** )
 {
     Fridge edigarian;
+    std::ifstream loadFile( "fridge.json" );
+    loadFile >> edigarian;
+    loadFile.close();
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -180,7 +185,9 @@ int main( int, char ** )
         g_pSwapChain->Present( 1, 0 ); // Present with vsync
         //g_pSwapChain->Present(0, 0); // Present without vsync
     }
-
+    std::ofstream saveFile( "fridge.json" );
+    saveFile << edigarian;
+    saveFile.close();
     // Cleanup
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplSDL2_Shutdown();

@@ -52,12 +52,15 @@ public:
     {
         return m_itemKinds;
     }
-    void AddItemByName(const std::string & name, std::chrono::year_month_day ymd );
+    void AddItemByName( const std::string & name, std::chrono::year_month_day ymd );
+
+    friend std::ostream & operator<<( std::ostream & os, const Fridge & fr );
+    friend std::istream & operator>>( std::istream & os, Fridge & fr );
 private:
     void AddItem( Itemid_t type, std::chrono::year_month_day ymd );
     void Sort();
     Itemid_t AddItemKind( std::string name );
-    
+
     enum class sorting_t
     {
         byId,
