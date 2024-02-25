@@ -1,4 +1,6 @@
 
+#include "fridge/fridge.hpp"
+
 #include <imgui.h>
 #include <imgui_impl_sdl2.h>
 #include <imgui_impl_dx11.h>
@@ -22,6 +24,7 @@ void CleanupRenderTarget();
 // Main code
 int main( int, char ** )
 {
+    Fridge edigarian;
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -158,6 +161,12 @@ int main( int, char ** )
             ImGui::Text( "Hello from another window!" );
             if ( ImGui::Button( "Close Me" ) )
                 show_another_window = false;
+            ImGui::End();
+        }
+
+        {
+            ImGui::Begin( "Lodowka" );
+            edigarian.Render();
             ImGui::End();
         }
 
