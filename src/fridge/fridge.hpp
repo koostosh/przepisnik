@@ -58,6 +58,14 @@ private:
     void Sort();
     Itemid_t AddItemKind( std::string name );
     
+    enum class sorting_t
+    {
+        byId,
+        byName,
+        byClosestDate,
+        byClosestDateGrouped
+    } m_sorting = sorting_t::byId;
+
     std::vector<Item> m_contents;
     std::map<Itemid_t, ItemKind> m_itemKinds;
     Widgets::ItemAddPopup m_itemAddPopup;

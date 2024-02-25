@@ -61,6 +61,12 @@ void Fridge::Render()
     SameLine();
     if ( Button( "+##add", btSize ) )
         m_itemAddPopup = { searcher, true };
+    SameLine();
+    if ( Button( "s##sort", btSize ) )
+    {
+        m_sorting = static_cast<sorting_t>(( static_cast< std::underlying_type_t<sorting_t> >( m_sorting ) + 1 ) % 4);
+        Sort();
+    }
 
     std::optional<Itemid_t> previous = std::nullopt;
     auto removeItr = m_contents.end();
@@ -150,10 +156,36 @@ void Fridge::AddItem( Itemid_t type, std::chrono::year_month_day ymd )
 
 void Fridge::Sort()
 {
-    std::ranges::sort( m_contents, []( const Item & lhs, const Item & rhs )
+    switch ( m_sorting )
     {
-        return lhs.id < rhs.id;
-    } );
+        default:
+        case Fridge::sorting_t::byId:
+            std::ranges::sort( m_contents, {}, &Item::id );
+            break;
+        case Fridge::sorting_t::byName:
+            std::ranges::sort( m_contents, [&]( const Item & lhs, const Item & rhs )
+            {
+                return std::tie(m_itemKinds[lhs.id].name, lhs.expiration) < std::tie(m_itemKinds[ rhs.id ].name, rhs.expiration);
+            } );
+            break;
+        case Fridge::sorting_t::byClosestDate:
+            std::ranges::sort( m_contents, {}, &Item::expiration );
+            break;
+        case Fridge::sorting_t::byClosestDateGrouped:
+        {
+            std::map<Itemid_t, std::chrono::year_month_day> sortKey;
+            for ( const auto & item : m_contents )
+            {
+                if ( !sortKey.emplace( item.id, item.expiration ).second )
+                    sortKey[ item.id ] = std::min( sortKey[ item.id ], item.expiration );
+            }
+            std::ranges::sort( m_contents, [&]( const Item & lhs, const Item & rhs )
+            {
+                return std::tie( sortKey[ lhs.id ], lhs.id, lhs.expiration ) < std::tie( sortKey[ rhs.id ], rhs.id, rhs.expiration );
+            } );
+            break;
+        }
+    }
 }
 
 Itemid_t Fridge::AddItemKind( std::string name )
