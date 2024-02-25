@@ -39,9 +39,9 @@ void Fridge::Render()
     using namespace ImGui;
     bool checkMatch = false;
     static std::regex r;
+    static std::string searcher;
 
     {
-        static std::string searcher;
         bool changed = InputText( "##searcher", &searcher );
         checkMatch = !searcher.empty();
         if ( changed )
@@ -59,67 +59,10 @@ void Fridge::Render()
 
     constexpr ImVec2 btSize{ 20,20 };
     SameLine();
-    {
-        static std::chrono::sys_days itemAddExpiration;
-        if ( Button( "+##add", btSize ) )
-        {
-            OpenPopup( "addItem" );
-            itemAddExpiration = std::chrono::floor<std::chrono::days>( std::chrono::system_clock::now() );
-        }
-
-        if ( BeginPopup( "addItem" ) )
-        {
-            static std::string itemAddName;
-            InputText( "##itemAddName", &itemAddName );
-            SameLine();
-            if ( BeginCombo( "##itemNameCombo", "select item", ImGuiComboFlags_NoPreview ) )
-            {
-                for ( const auto & pair : m_itemKinds )
-                {
-                    if ( Selectable( pair.second.name.c_str(), false ) )
-                    {
-                        itemAddName = pair.second.name;
-                    }
-                }
-                EndCombo();
-            }
-
-            std::chrono::year_month_day ymd = itemAddExpiration;
-            Text( "%i-%i-%i", ymd.day(), ymd.month(), ymd.year() );
-            SameLine();
-            if ( Button( "+d", btSize ) )
-                itemAddExpiration += std::chrono::days( 1 );
-            SameLine();
-            if ( Button( "+m", btSize ) )
-            {
-                ymd += std::chrono::months( 1 );
-                itemAddExpiration = ymd;
-            }
-            SameLine();
-            if ( Button( "+y", btSize ) )
-            {
-                ymd += std::chrono::years( 1 );
-                itemAddExpiration = ymd;
-            }
-
-            if ( Button( "Dodaj" ) )
-            {
-                auto finder = std::ranges::find( m_itemKinds, itemAddName, []( const auto & pair )
-                {
-                    return pair.second.name;
-                } );
-                if ( finder != m_itemKinds.end() )
-                    AddItem( finder->first, ymd );
-                else
-                    AddItem( AddItemKind( itemAddName ), ymd );
-            }
-
-            EndPopup();
-        }
-    }
+    if ( Button( "+##add", btSize ) )
+        m_itemAddPopup = { searcher, true };
 
     std::optional<Itemid_t> previous = std::nullopt;
-    std::optional<Itemid_t> addEntry = std::nullopt;
     auto removeItr = m_contents.end();
     if ( BeginTable( "##fridgeTable", 4 ) )
     {
@@ -151,7 +94,7 @@ void Fridge::Render()
             {
                 SameLine();
                 if ( Button( "+##add", btSize ) )
-                    addEntry = itr->id;
+                    m_itemAddPopup = { itemKind.name };
                 SameLine();
                 if ( Button( "...##edit", btSize ) )
                     OpenPopup( "##editPopup" );
@@ -175,9 +118,28 @@ void Fridge::Render()
         EndTable();
         if ( removeItr != m_contents.end() )
             m_contents.erase( removeItr );
-        if ( addEntry )
-            AddItem( addEntry.value() );
     }
+
+    m_itemAddPopup.Render(*this);
+}
+
+void Fridge::AddItemByName( const std::string & name, std::chrono::year_month_day ymd )
+{
+    auto finder = std::ranges::find_if( m_itemKinds, [&]( const auto & pair )
+    {
+        if (pair.second.name.size() != name.size())
+            return false;
+        for ( size_t i = 0; i < name.size(); ++i )
+        {
+            if ( std::tolower( name[ i ], std::locale() ) != std::tolower( pair.second.name[ i ], std::locale() ) )
+                return false;
+        }
+        return true;
+    } );
+    if ( finder != m_itemKinds.end() )
+        AddItem( finder->first, ymd );
+    else
+        AddItem( AddItemKind( name ), ymd );
 }
 
 void Fridge::AddItem( Itemid_t type, std::chrono::year_month_day ymd )
