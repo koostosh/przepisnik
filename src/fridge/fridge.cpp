@@ -33,6 +33,7 @@ void Fridge::Render()
     bool checkMatch = false;
     static std::regex r;
     static std::string searcher;
+    const auto expirationWarning = std::chrono::floor<std::chrono::days>( std::chrono::system_clock::now() ) + std::chrono::days(2);
 
     {
         bool changed = InputText( "##searcher", &searcher );
@@ -74,6 +75,8 @@ void Fridge::Render()
             PushID( &*itr );
             bool isHeader = previous != itr->id;
             TableNextRow();
+            if ( itr->expiration <= expirationWarning )
+                TableSetBgColor( ImGuiTableBgTarget_RowBg0, ImColor( 120, 20, 40, 128 ) );
             TableNextColumn();
             if ( isHeader )
                 Text( itemKind.name.c_str() );
