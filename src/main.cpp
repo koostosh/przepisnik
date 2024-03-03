@@ -177,7 +177,7 @@ int main( int, char ** )
         }
 
         {
-            ImGui::Begin( "Lodowka" );
+            ImGui::Begin( "Lodówka" );
             edigarian.Render();
             ImGui::End();
         }

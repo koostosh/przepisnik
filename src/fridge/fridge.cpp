@@ -56,9 +56,8 @@ void Fridge::Render()
     if ( Button( "+##add", btSize ) )
         m_itemAddPopup = { searcher, true };
     SameLine();
-    if ( Button( "s##sort", btSize ) )
+    if ( Widgets::SelectorRender( m_sorting ) )
     {
-        m_sorting = static_cast< sorting_t >( ( static_cast< std::underlying_type_t<sorting_t> >( m_sorting ) + 1 ) % 4 );
         Sort();
     }
 
@@ -202,7 +201,7 @@ std::ostream & operator<<( std::ostream & os, const Fridge & fr )
     nlohmann::json j;
     for ( auto & kind : fr.m_itemKinds )
     {
-        j[ "kinds" ][ kind.first ] = { {"name", kind.second.name}, {"measurement", kind.second.measurement} };
+        j[ "kinds" ][ kind.first ] = { {"name", kind.second.name}, {"measurement", kind.second.measurement}, {"id", kind.first} };
     }
     for ( auto & item : fr.m_contents )
     {
@@ -224,6 +223,8 @@ std::istream & operator>>( std::istream & os, Fridge & fr )
         {
             if ( el.is_null() )
                 continue;
+            if ( !el[ "id" ].is_null() ) //temporary, TODO: remove after porting
+                id = el[ "id" ];
             kinds[ id ].name = el[ "name" ];
             kinds[ id ].measurement = el[ "measurement" ];
             for ( auto & eli : el[ "items" ] )

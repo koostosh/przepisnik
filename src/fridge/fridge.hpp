@@ -39,6 +39,10 @@ namespace Widgets
         bool modifiable;
         bool open;
     };
+
+    // type based selector for explicit instatiation
+    template<typename T>
+    bool SelectorRender( T & value );
 }
 
 class Fridge
@@ -56,10 +60,6 @@ public:
 
     friend std::ostream & operator<<( std::ostream & os, const Fridge & fr );
     friend std::istream & operator>>( std::istream & os, Fridge & fr );
-private:
-    void AddItem( Itemid_t type, std::chrono::year_month_day ymd );
-    void Sort();
-    Itemid_t AddItemKind( std::string name );
 
     enum class sorting_t
     {
@@ -67,7 +67,13 @@ private:
         byName,
         byClosestDate,
         byClosestDateGrouped
-    } m_sorting = sorting_t::byId;
+    };
+private:
+    void AddItem( Itemid_t type, std::chrono::year_month_day ymd );
+    void Sort();
+    Itemid_t AddItemKind( std::string name );
+
+    sorting_t m_sorting = sorting_t::byId;
 
     std::vector<Item> m_contents;
     std::map<Itemid_t, ItemKind> m_itemKinds;
