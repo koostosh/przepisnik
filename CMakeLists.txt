@@ -29,4 +29,7 @@ target_link_libraries(przepisnik PUBLIC ${DependenciesList}
     d3d11 # direct lib name
 )
 
+add_custom_command(TARGET przepisnik POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/ $<TARGET_FILE_DIR:przepisnik>/data/.)
+
 install(TARGETS przepisnik DESTINATION ".")
+install(DIRECTORY "data" DESTINATION ".")

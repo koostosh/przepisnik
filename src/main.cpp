@@ -96,6 +96,13 @@ int main( int, char ** )
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
 
+    static const ImWchar fontRanges[] =
+    {
+        0x0020, 0x017F, // Basic Latin + Latin-1 Supplement + Latin Extended-A
+        0,
+    };
+    ImGui::GetIO().Fonts->AddFontFromFileTTF("data/OpenSans-Medium.ttf", 15.0f, nullptr, fontRanges);
+
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
