@@ -5,6 +5,7 @@ project(przepisnik)
 
 if(MSVC)
     add_compile_options("/MP")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
 file(GLOB_RECURSE PRZEPISNIK_SOURCES CONFIGURE_DEPENDS "src/*.cpp" "src/*.hpp" )
@@ -17,9 +18,15 @@ find_package(sdl2 CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
-target_link_libraries(przepisnik PUBLIC
+list(APPEND DependenciesList
     imgui::imgui
     SDL2::SDL2 SDL2::SDL2main
     nlohmann_json::nlohmann_json
-    d3d11
 )
+
+target_link_libraries(przepisnik PUBLIC ${DependenciesList}
+
+    d3d11 # direct lib name
+)
+
+install(TARGETS przepisnik DESTINATION ".")

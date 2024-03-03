@@ -1,0 +1,35 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Windows x64 static",
+            "binaryDir": "${sourceDir}/build",
+            "installDir": "${sourceDir}/bin/",
+            "generator": "Visual Studio 16 2019",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows-static",
+                "CMAKE_CONFIGURATION_TYPES": "Debug;Release",
+                "CMAKE_INSTALL_PREFIX": {
+                    "type": "FILEPATH",
+                    "value": "${sourceDir}/install"
+                }
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default-debug",
+            "displayName": "Debug",
+            "configurePreset": "default",
+            "configuration": "Debug"
+        },
+        {
+            "name": "default-release",
+            "displayName": "Release",
+            "configurePreset": "default",
+            "configuration": "Release"
+        }
+    ]
+}
