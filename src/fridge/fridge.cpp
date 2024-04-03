@@ -146,7 +146,7 @@ void Fridge::Load( const nlohmann::json & j )
     m_contents = std::move( contents );
 }
 
-void Fridge::Save( nlohmann::json & j )
+void Fridge::Save( nlohmann::json & j ) const
 {
     for ( auto & item : m_contents )
     {

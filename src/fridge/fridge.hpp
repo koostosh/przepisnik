@@ -9,7 +9,6 @@
 
 struct Item
 {
-    typedef uint32_t Itemquantity_t;
     Itemid_t id;
     Itemquantity_t quantity;
     std::chrono::year_month_day expiration;
@@ -41,7 +40,7 @@ public:
     void AddItemByName( const std::string & name, std::chrono::year_month_day ymd );
 
     void Load( const nlohmann::json & j );
-    void Save( nlohmann::json & j );
+    void Save( nlohmann::json & j ) const;
 
     enum class sorting_t
     {

@@ -19,7 +19,7 @@ void Catalog::Load( const nlohmann::json & j )
     m_itemKinds = std::move( kinds );
 }
 
-void Catalog::Save( nlohmann::json & j )
+void Catalog::Save( nlohmann::json & j ) const
 {
     for ( auto & kind : m_itemKinds )
     {

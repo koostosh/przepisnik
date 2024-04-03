@@ -1,4 +1,5 @@
 
+#include "book/book.hpp"
 #include "fridge/fridge.hpp"
 
 #include <d3d11.h>
@@ -29,6 +30,7 @@ int main( int, char ** )
 {
     Catalog avon;
     Fridge edigarian(avon);
+    Book newBraveWorld;
     std::ifstream loadFile( "fridge.json" );
     try
     {
@@ -36,12 +38,14 @@ int main( int, char ** )
         loadFile >> j;
         avon.Load( j );
         edigarian.Load( j );
+        newBraveWorld.Load( j );
     }
     catch ( ... )
     {
     }
 
     loadFile.close();
+    itemNameGetter_t ing{ avon };
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -196,6 +200,10 @@ int main( int, char ** )
             ImGui::Begin( "Katalog" );
             avon.Render();
             ImGui::End();
+
+            ImGui::Begin( "Przepisy" );
+            newBraveWorld.Render(ing);
+            ImGui::End();
         }
 
         // Rendering
@@ -212,6 +220,7 @@ int main( int, char ** )
     nlohmann::json j;
     avon.Save( j );
     edigarian.Save( j );
+    newBraveWorld.Save( j );
     saveFile << j.dump(4);
     saveFile.close();
     // Cleanup

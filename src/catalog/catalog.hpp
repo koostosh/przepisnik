@@ -4,10 +4,13 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <string>
 
 typedef uint32_t Itemid_t;
+typedef uint32_t Itemquantity_t;
+typedef std::function<std::string( Itemid_t )> itemNameGetter_t;
 
 struct ItemKind
 {
@@ -27,10 +30,10 @@ public:
     void Render();
 
     void Load( const nlohmann::json & j );
-    void Save( nlohmann::json & j );
+    void Save( nlohmann::json & j ) const;
 
     Itemid_t AddItemKind( std::string name );
-    const ItemKind & operator[]( Itemid_t id )
+    const ItemKind & operator[]( Itemid_t id ) const
     {
         static ItemKind empty{};
         auto itr = m_itemKinds.find( id );
@@ -41,6 +44,14 @@ public:
     const auto & GetItemKinds() const
     {
         return m_itemKinds;
+    }
+
+    operator itemNameGetter_t()
+    {
+        return [&]( auto id )
+        {
+            return this->operator[]( id ).name;
+        };
     }
 private:
     std::map<Itemid_t, ItemKind> m_itemKinds;
