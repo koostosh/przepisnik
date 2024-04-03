@@ -45,7 +45,6 @@ int main( int, char ** )
     }
 
     loadFile.close();
-    itemNameGetter_t ing{ avon };
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
     // depending on whether SDL_INIT_GAMECONTROLLER is enabled or disabled.. updating to the latest version of SDL is recommended!)
@@ -202,7 +201,7 @@ int main( int, char ** )
             ImGui::End();
 
             ImGui::Begin( "Przepisy" );
-            newBraveWorld.Render(ing);
+            newBraveWorld.Render(avon);
             ImGui::End();
         }
 

@@ -28,7 +28,7 @@ public:
         reopen
     };
 
-    RecipleDisplayCtx( const Recipe & r, size_t idx, const itemNameGetter_t & ing );
+    RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing );
     returned_t Render( const itemNameGetter_t & ing );
 
     const size_t m_idx;
@@ -41,8 +41,8 @@ private:
     std::vector<std::string> m_ingredients;
     std::string m_windowName;
     Recipe m_r;
-    Itemid_t m_itemToBeAdded;
-    Itemquantity_t m_countToBeAdded;
+    Itemquantity_t m_countToBeAdded = 0;
+    Widgets::ItemKindCombo m_ikc;
     bool edit = false;
 };
 
@@ -53,7 +53,7 @@ public:
     {
     };
 
-    void Render( const itemNameGetter_t & ing );
+    void Render( const Catalog & ing );
 
     void Load( const nlohmann::json & j );
     void Save( nlohmann::json & j ) const;

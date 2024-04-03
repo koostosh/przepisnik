@@ -10,7 +10,7 @@
 
 typedef uint32_t Itemid_t;
 typedef uint32_t Itemquantity_t;
-typedef std::function<std::string( Itemid_t )> itemNameGetter_t;
+typedef std::function<const std::string( Itemid_t )> itemNameGetter_t;
 
 struct ItemKind
 {
@@ -20,6 +20,21 @@ struct ItemKind
         pcs, grams, custom
     } measurement;
 };
+
+class Catalog;
+namespace Widgets
+{
+    struct ItemKindCombo
+    {
+        ItemKindCombo( const Catalog & c ) : m_c( c )
+        {
+        };
+        bool Render();
+        Itemid_t selected = 0;
+    private:
+        const Catalog & m_c;
+    };
+}
 
 class Catalog
 {
@@ -46,7 +61,7 @@ public:
         return m_itemKinds;
     }
 
-    operator itemNameGetter_t()
+    operator itemNameGetter_t() const
     {
         return [&]( auto id )
         {

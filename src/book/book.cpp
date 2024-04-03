@@ -9,7 +9,7 @@
 #include <format>
 #include <optional>
 
-void Book::Render( const itemNameGetter_t & ing )
+void Book::Render( const Catalog & ing )
 {
     if ( Widgets::SButton( "+##add" ) )
     {
@@ -56,12 +56,12 @@ void Book::Save( nlohmann::json & j ) const
 {
 }
 
-RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const itemNameGetter_t & ing ) : m_r( r ), m_idx( idx )
+RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing ) : m_r( r ), m_idx( idx ), m_ikc(ing)
 {
     nameChanged();
     m_ingredients.reserve( r.ingredients.size() );
     for ( auto & element : r.ingredients )
-        m_ingredients.emplace_back( std::format( "{}: {}/{}", ing( element.first ), 0u, element.second ) );
+        m_ingredients.emplace_back( std::format( "{}: {}/{}", ing[ element.first ].name, 0u, element.second ) );
 }
 
 RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t & ing )
@@ -98,15 +98,16 @@ RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t 
 
             if ( edit )
             {
-                //TODO: handle item selection and adding
                 TableNextRow();
                 TableNextColumn();
-                InputScalar( "##itemidSelector", ImGuiDataType_U32, &m_itemToBeAdded );
+                m_ikc.Render();
                 TableNextColumn();
                 InputScalar( "##itemcountSelector", ImGuiDataType_U32, &m_countToBeAdded );
                 SameLine();
                 if ( Widgets::SButton( "+##addIngredient" ) )
                 {
+                    m_ingredients.emplace_back( std::format( "{}: {}/{}", ing( m_ikc.selected ), 0u, m_countToBeAdded ) );
+                    m_r.ingredients.emplace_back( m_ikc.selected, m_countToBeAdded );
                 }
             }
 
