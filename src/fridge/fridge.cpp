@@ -23,7 +23,7 @@ const char * measurementFormatter( const ItemKind & ik )
     }
 }
 
-Fridge::Fridge()
+Fridge::Fridge( Catalog & catalog ) : m_catalogRef( catalog )
 {
 }
 
@@ -33,7 +33,7 @@ void Fridge::Render()
     bool checkMatch = false;
     static std::regex r;
     static std::string searcher;
-    const auto expirationWarning = std::chrono::floor<std::chrono::days>( std::chrono::system_clock::now() ) + std::chrono::days(2);
+    const auto expirationWarning = std::chrono::floor<std::chrono::days>( std::chrono::system_clock::now() ) + std::chrono::days( 2 );
 
     {
         bool changed = InputText( "##searcher", &searcher );
@@ -51,9 +51,8 @@ void Fridge::Render()
         }
     }
 
-    constexpr ImVec2 btSize{ 20,20 };
     SameLine();
-    if ( Button( "+##add", btSize ) )
+    if ( Widgets::SButton( "+##add" ) )
         m_itemAddPopup = { searcher, true };
     SameLine();
     if ( Widgets::SelectorRender( m_sorting ) )
@@ -67,7 +66,7 @@ void Fridge::Render()
     {
         for ( auto itr = m_contents.begin(); itr != m_contents.end(); ++itr )
         {
-            auto & itemKind = m_itemKinds[ itr->id ];
+            auto & itemKind = m_catalogRef[ itr->id ];
             if ( checkMatch && !std::regex_search( itemKind.name, r ) )
                 continue;
 
@@ -89,27 +88,14 @@ void Fridge::Render()
 
             TableNextColumn();
 
-            if ( Button( "-##remove", btSize ) )
+            if ( Widgets::SButton( "-##remove" ) )
                 removeItr = itr;
             if ( isHeader )
             {
                 SameLine();
-                if ( Button( "+##add", btSize ) )
+                if ( Widgets::SButton( "+##add" ) )
                     m_itemAddPopup = { itemKind.name };
                 SameLine();
-                if ( Button( "...##edit", btSize ) )
-                    OpenPopup( "##editPopup" );
-
-                if ( BeginPopup( "##editPopup" ) )
-                {
-                    if ( Selectable( "pcs", itemKind.measurement == ItemKind::measurement_t::pcs ) )
-                        itemKind.measurement = ItemKind::measurement_t::pcs;
-                    if ( Selectable( "grams", itemKind.measurement == ItemKind::measurement_t::grams ) )
-                        itemKind.measurement = ItemKind::measurement_t::grams;
-                    if ( Selectable( "custom", itemKind.measurement == ItemKind::measurement_t::custom ) )
-                        itemKind.measurement = ItemKind::measurement_t::custom;
-                    EndPopup();
-                }
             }
 
             PopID();
@@ -121,12 +107,13 @@ void Fridge::Render()
             m_contents.erase( removeItr );
     }
 
-    m_itemAddPopup.Render( *this );
+    m_itemAddPopup.Render( *this, m_catalogRef );
 }
 
 void Fridge::AddItemByName( const std::string & name, std::chrono::year_month_day ymd )
 {
-    auto finder = std::ranges::find_if( m_itemKinds, [&]( const auto & pair )
+    auto & kinds = m_catalogRef.GetItemKinds();
+    auto finder = std::ranges::find_if( kinds, [&]( const auto & pair )
     {
         if ( pair.second.name.size() != name.size() )
             return false;
@@ -137,10 +124,34 @@ void Fridge::AddItemByName( const std::string & name, std::chrono::year_month_da
         }
         return true;
     } );
-    if ( finder != m_itemKinds.end() )
+    if ( finder != kinds.end() )
         AddItem( finder->first, ymd );
     else
-        AddItem( AddItemKind( name ), ymd );
+        AddItem( m_catalogRef.AddItemKind( name ), ymd );
+}
+
+void Fridge::Load( const nlohmann::json & j )
+{
+    decltype( m_contents ) contents;
+    for ( auto & el : j[ "kinds" ] )
+    {
+        if ( el.is_null() )
+            continue;
+        Itemid_t id = el[ "id" ];
+        if ( el.contains( "items" ) )
+            for ( auto & eli : el[ "items" ] )
+                contents.emplace_back( id, eli[ "quantity" ], std::chrono::sys_days( std::chrono::days( eli[ "expiration" ] ) ) );
+    }
+    // parsing successful
+    m_contents = std::move( contents );
+}
+
+void Fridge::Save( nlohmann::json & j )
+{
+    for ( auto & item : m_contents )
+    {
+        j[ "kinds" ][ item.id ][ "items" ].push_back( { {"quantity", item.quantity}, {"expiration", std::chrono::sys_days( item.expiration ).time_since_epoch().count()} } );
+    }
 }
 
 void Fridge::AddItem( Itemid_t type, std::chrono::year_month_day ymd )
@@ -160,7 +171,7 @@ void Fridge::Sort()
         case Fridge::sorting_t::byName:
             std::ranges::sort( m_contents, [&]( const Item & lhs, const Item & rhs )
             {
-                return std::tie( m_itemKinds[ lhs.id ].name, lhs.expiration ) < std::tie( m_itemKinds[ rhs.id ].name, rhs.expiration );
+                return std::tie( m_catalogRef[ lhs.id ].name, lhs.expiration ) < std::tie( m_catalogRef[ rhs.id ].name, rhs.expiration );
             } );
             break;
         case Fridge::sorting_t::byClosestDate:
@@ -181,63 +192,4 @@ void Fridge::Sort()
             break;
         }
     }
-}
-
-Itemid_t Fridge::AddItemKind( std::string name )
-{
-    Itemid_t newId;
-    if ( m_itemKinds.crbegin() == m_itemKinds.crend() )
-        newId = 0;
-    else
-        newId = m_itemKinds.crbegin()->first + 1;
-
-    m_itemKinds[ newId ].name = name;
-
-    return newId;
-}
-
-std::ostream & operator<<( std::ostream & os, const Fridge & fr )
-{
-    nlohmann::json j;
-    for ( auto & kind : fr.m_itemKinds )
-    {
-        j[ "kinds" ][ kind.first ] = { {"name", kind.second.name}, {"measurement", kind.second.measurement}, {"id", kind.first} };
-    }
-    for ( auto & item : fr.m_contents )
-    {
-        j[ "kinds" ][ item.id ][ "items" ].push_back( { {"quantity", item.quantity}, {"expiration", std::chrono::sys_days( item.expiration ).time_since_epoch().count()} } );
-    }
-    return os << j.dump(4);
-}
-
-std::istream & operator>>( std::istream & os, Fridge & fr )
-{
-    try
-    {
-        nlohmann::json j;
-        os >> j;
-        Itemid_t id = 0;
-        decltype( fr.m_itemKinds ) kinds;
-        decltype( fr.m_contents ) contents;
-        for ( auto & el : j[ "kinds" ] )
-        {
-            if ( el.is_null() )
-                continue;
-            if ( !el[ "id" ].is_null() ) //temporary, TODO: remove after porting
-                id = el[ "id" ];
-            kinds[ id ].name = el[ "name" ];
-            kinds[ id ].measurement = el[ "measurement" ];
-            for ( auto & eli : el[ "items" ] )
-                contents.emplace_back( id, eli[ "quantity" ], std::chrono::sys_days( std::chrono::days( eli[ "expiration" ] ) ) );
-            ++id;
-        }
-        // parsing successful
-        fr.m_itemKinds = std::move( kinds );
-        fr.m_contents = std::move( contents );
-    }
-    catch ( ... )
-    {
-        // TODO: inform user the file is damaged
-    }
-    return os;
 }

@@ -1,13 +1,14 @@
 
 #include "fridge/fridge.hpp"
 
-#include <imgui.h>
-#include <imgui_impl_sdl2.h>
-#include <imgui_impl_dx11.h>
 #include <d3d11.h>
-#include <stdio.h>
+#include <imgui.h>
+#include <imgui_impl_dx11.h>
+#include <imgui_impl_sdl2.h>
+#include <nlohmann/json.hpp>
 #include <SDL.h>
 #include <SDL_syswm.h>
+#include <stdio.h>
 
 #include <fstream>
 
@@ -26,9 +27,20 @@ void CleanupRenderTarget();
 // Main code
 int main( int, char ** )
 {
-    Fridge edigarian;
+    Catalog avon;
+    Fridge edigarian(avon);
     std::ifstream loadFile( "fridge.json" );
-    loadFile >> edigarian;
+    try
+    {
+        nlohmann::json j;
+        loadFile >> j;
+        avon.Load( j );
+        edigarian.Load( j );
+    }
+    catch ( ... )
+    {
+    }
+
     loadFile.close();
     // Setup SDL
     // (Some versions of SDL before <2.0.10 appears to have performance/stalling issues on a minority of Windows systems,
@@ -180,6 +192,10 @@ int main( int, char ** )
             ImGui::Begin( "Lodówka" );
             edigarian.Render();
             ImGui::End();
+
+            ImGui::Begin( "Katalog" );
+            avon.Render();
+            ImGui::End();
         }
 
         // Rendering
@@ -193,7 +209,10 @@ int main( int, char ** )
         //g_pSwapChain->Present(0, 0); // Present without vsync
     }
     std::ofstream saveFile( "fridge.json" );
-    saveFile << edigarian;
+    nlohmann::json j;
+    avon.Save( j );
+    edigarian.Save( j );
+    saveFile << j.dump(4);
     saveFile.close();
     // Cleanup
     ImGui_ImplDX11_Shutdown();

@@ -6,9 +6,7 @@
 
 namespace Widgets
 {
-
     using namespace ImGui;
-    constexpr ImVec2 btSize{ 20,20 };
 
     ItemAddPopup::ItemAddPopup() : open(false)
     {
@@ -22,7 +20,7 @@ namespace Widgets
         modifiable = name.empty() || modif;
     }
 
-    bool ItemAddPopup::Render( Fridge & parent )
+    bool ItemAddPopup::Render( Fridge & parent, const Catalog & catalog )
     {
         if ( open )
         {
@@ -38,7 +36,7 @@ namespace Widgets
                 SameLine();
                 if ( BeginCombo( "##itemNameCombo", "select item", ImGuiComboFlags_NoPreview ) )
                 {
-                    for ( const auto & pair : parent.GetItemKinds() )
+                    for ( const auto & pair : catalog.GetItemKinds() )
                     {
                         if ( Selectable( pair.second.name.c_str(), false ) )
                         {
@@ -58,16 +56,16 @@ namespace Widgets
             std::chrono::year_month_day ymd = expiration;
             Text( "%i-%i-%i", ymd.day(), ymd.month(), ymd.year() );
             SameLine();
-            if ( Button( "+d", btSize ) )
+            if ( SButton( "+d" ) )
                 expiration += std::chrono::days( 1 );
             SameLine();
-            if ( Button( "+m", btSize ) )
+            if ( SButton( "+m" ) )
             {
                 ymd += std::chrono::months( 1 );
                 expiration = ymd;
             }
             SameLine();
-            if ( Button( "+y", btSize ) )
+            if ( SButton( "+y" ) )
             {
                 ymd += std::chrono::years( 1 );
                 expiration = ymd;
@@ -87,7 +85,7 @@ namespace Widgets
     template <>
     bool SelectorRender( Fridge::sorting_t & value)
     {
-        const bool used = Button( "s", btSize );
+        const bool used = SButton( "s" );
         if (used)
         {
             value = static_cast< Fridge::sorting_t >( ( static_cast< std::underlying_type_t<Fridge::sorting_t> >( value ) + 1 ) % 4 );
