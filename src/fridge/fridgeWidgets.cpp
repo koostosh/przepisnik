@@ -1,6 +1,8 @@
 
 #include "fridge.hpp"
 
+#include "textConstants.hpp"
+
 #include <imgui.h>
 #include <imgui_stdlib.h>
 
@@ -8,14 +10,14 @@ namespace Widgets
 {
     using namespace ImGui;
 
-    ItemAddPopup::ItemAddPopup() : open(false)
+    ItemAddPopup::ItemAddPopup() : open( false )
     {
     }
 
     ItemAddPopup::ItemAddPopup( const std::string & hint, bool modif ) :
         name( hint ),
         expiration( std::chrono::floor<std::chrono::days>( std::chrono::system_clock::now() ) ),
-        open(true)
+        open( true )
     {
         modifiable = name.empty() || modif;
     }
@@ -34,7 +36,7 @@ namespace Widgets
             {
                 InputText( "##itemAddName", &name );
                 SameLine();
-                if ( BeginCombo( "##itemNameCombo", "select item", ImGuiComboFlags_NoPreview ) )
+                if ( BeginCombo( "##itemNameCombo", language::selectIngredient.data(), ImGuiComboFlags_NoPreview ) )
                 {
                     for ( const auto & pair : catalog.GetItemKinds() )
                     {
@@ -71,7 +73,7 @@ namespace Widgets
                 expiration = ymd;
             }
 
-            if ( Button( "Dodaj" ) )
+            if ( Button( language::b_add.data() ) )
             {
                 parent.AddItemByName( name, ymd );
                 CloseCurrentPopup();
@@ -83,10 +85,10 @@ namespace Widgets
     }
 
     template <>
-    bool SelectorRender( Fridge::sorting_t & value)
+    bool SelectorRender( Fridge::sorting_t & value )
     {
         const bool used = SButton( "s" );
-        if (used)
+        if ( used )
         {
             value = static_cast< Fridge::sorting_t >( ( static_cast< std::underlying_type_t<Fridge::sorting_t> >( value ) + 1 ) % 4 );
         }
@@ -95,16 +97,16 @@ namespace Widgets
             switch ( value )
             {
                 case Fridge::sorting_t::byId:
-                    SetTooltip( "sortowanie: po id");
+                    SetTooltip( language::sort_id.data() );
                     break;
                 case Fridge::sorting_t::byName:
-                    SetTooltip( "sortowanie: po nazwie" );
+                    SetTooltip( language::sort_name.data() );
                     break;
                 case Fridge::sorting_t::byClosestDate:
-                    SetTooltip( "sortowanie: po dacie przydatności" );
+                    SetTooltip( language::sort_date.data() );
                     break;
                 case Fridge::sorting_t::byClosestDateGrouped:
-                    SetTooltip( "sortowanie: po dacie przydatności (grupowane)" );
+                    SetTooltip( language::sort_dateGrouped.data() );
                     break;
             }
 

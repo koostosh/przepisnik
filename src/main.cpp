@@ -2,6 +2,7 @@
 #include "app.hpp"
 #include "book/book.hpp"
 #include "fridge/fridge.hpp"
+#include "textConstants.hpp"
 
 #include <imgui.h>
 #include <nlohmann/json.hpp>
@@ -17,7 +18,7 @@ int WinMain( int, char ** )
     Catalog avon;
     Fridge edigarian( avon );
     Book newBraveWorld;
-    std::ifstream loadFile( "fridge.json" );
+    std::ifstream loadFile( otherConstants::mainFilename );
     try
     {
         nlohmann::json j;
@@ -37,21 +38,24 @@ int WinMain( int, char ** )
         running &= app->EventLoop();
         running &= app->BeginFrame();
 
-        ImGui::Begin( "Lodówka" );
+        ImGui::SetNextWindowSize( { 300,300 }, ImGuiCond_FirstUseEver );
+        ImGui::Begin( language::fridgeWindowName.data() );
         edigarian.Render();
         ImGui::End();
 
-        ImGui::Begin( "Katalog" );
+        ImGui::SetNextWindowSize( { 300,300 }, ImGuiCond_FirstUseEver );
+        ImGui::Begin( language::catalogWindowName.data() );
         avon.Render();
         ImGui::End();
 
-        ImGui::Begin( "Przepisy" );
+        ImGui::SetNextWindowSize( { 300,300 }, ImGuiCond_FirstUseEver );
+        ImGui::Begin( language::bookWindowName.data() );
         newBraveWorld.Render( avon );
         ImGui::End();
 
         running &= app->EndFrame();
     }
-    std::ofstream saveFile( "fridge.json" );
+    std::ofstream saveFile( otherConstants::mainFilename );
     nlohmann::json j;
     avon.Save( j );
     edigarian.Save( j );

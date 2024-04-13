@@ -1,6 +1,7 @@
 
 #include "book.hpp"
 
+#include "textConstants.hpp"
 #include "widgets.hpp"
 
 #include <imgui.h>
@@ -14,7 +15,7 @@ void Book::Render( const Catalog & ing )
 {
     if ( Widgets::SButton( "+##add" ) )
     {
-        m_recipes.emplace_back( Recipe{ {}, "nowy przepis", {}, {} } );
+        m_recipes.emplace_back( Recipe{ {}, language::newRecipeName.data(), {}, {} } );
     }
     using namespace ImGui;
 
@@ -150,24 +151,24 @@ RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t 
         {
             if ( InputText( "##name", &m_r.name ) )
                 nameChanged();
-            if ( Button( "Save as copy" ) )
+            if ( Button( language::b_save.data() ) )
             {
                 ret = returned_t::saveCopy;
             }
 
-            if ( Button( "Save as overwrite" ) )
+            if ( Button( language::b_saveCopy.data() ) )
             {
                 ret = returned_t::saveOverwrite;
             }
 
-            if ( Button( "Discard changes" ) )
+            if ( Button( language::b_discard.data() ) )
             {
                 ret = returned_t::reopen;
             }
         }
         else
         {
-            if ( Button( "Edit" ) )
+            if ( Button( language::b_edit.data() ) )
                 edit = true;
         }
     }

@@ -1,6 +1,7 @@
 
 #include "app.hpp"
 
+#include "textConstants.hpp"
 
 #include <d3d11.h>
 #include <imgui_impl_dx11.h>
@@ -78,7 +79,7 @@ private:
         SDL_SetHint( SDL_HINT_IME_SHOW_UI, "1" );
 
         m_sdlWindow = SDL_CreateWindow(
-            "Dear ImGui SDL2+DirectX11 example",
+            language::bigWindowName.data(),
             SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             1280, 720,
             SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI );
