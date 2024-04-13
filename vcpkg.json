@@ -17,4 +17,4 @@
         "sdl2",
         "nlohmann-json"
     ]
-  }
+}
