@@ -5,6 +5,7 @@
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
+#include <nlohmann/json.hpp>
 
 #include <format>
 #include <optional>
@@ -50,13 +51,41 @@ void Book::Render( const Catalog & ing )
 
 void Book::Load( const nlohmann::json & j )
 {
+    decltype( m_recipes ) recipes;
+    for ( auto & el : j[ "recipes" ] )
+    {
+        if ( el.is_null() )
+            continue;
+        auto & r = recipes.emplace_back();
+        r.name = el[ "name" ];
+        r.instructions = el[ "instructions" ];
+        r.seasoning = el[ "seasoning" ];
+        if ( el.contains( "ingredients" ) )
+            for ( auto & ing : el[ "ingredients" ] )
+                r.ingredients.emplace_back( ing[ "id" ].get<Itemid_t>(), ing[ "quantity" ].get<Itemquantity_t>() );
+    }
+    // parsing successful
+    m_recipes = std::move( recipes );
 }
 
 void Book::Save( nlohmann::json & j ) const
 {
+    for ( const auto & recipe : m_recipes )
+    {
+        nlohmann::json jr;
+        jr[ "name" ] = recipe.name;
+        jr[ "instructions" ] = recipe.instructions;
+        jr[ "seasoning" ] = recipe.seasoning;
+        for ( auto & ing : recipe.ingredients )
+        {
+            jr[ "ingredients" ].push_back( { {"id", ing.first }, {"quantity", ing.second} } );
+        }
+
+        j[ "recipes" ].push_back( std::move( jr ) );
+    }
 }
 
-RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing ) : m_r( r ), m_idx( idx ), m_ikc(ing)
+RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing ) : m_r( r ), m_idx( idx ), m_ikc( ing )
 {
     nameChanged();
     m_ingredients.reserve( r.ingredients.size() );
