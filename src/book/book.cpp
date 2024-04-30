@@ -153,12 +153,12 @@ RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t 
                 nameChanged();
             if ( Button( language::b_save.data() ) )
             {
-                ret = returned_t::saveCopy;
+                ret = returned_t::saveOverwrite;
             }
 
             if ( Button( language::b_saveCopy.data() ) )
             {
-                ret = returned_t::saveOverwrite;
+                ret = returned_t::saveCopy;
             }
 
             if ( Button( language::b_discard.data() ) )
