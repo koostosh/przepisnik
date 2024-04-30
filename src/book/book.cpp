@@ -33,6 +33,8 @@ void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
         auto returned = m_displayed->Render( ing );
         switch ( returned )
         {
+            case RecipeDisplayCtx::returned_t::stayOpen:
+                break;
             case RecipeDisplayCtx::returned_t::close:
                 m_displayed.reset();
                 break;
@@ -45,6 +47,10 @@ void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
             case RecipeDisplayCtx::returned_t::reopen:
                 if ( m_displayed->m_idx < m_recipes.size() )
                     m_displayed = std::make_unique<RecipeDisplayCtx>( m_recipes[ m_displayed->m_idx ], m_displayed->m_idx, ing, qGetter );
+                break;
+            case RecipeDisplayCtx::returned_t::remove:
+                m_recipes.erase( m_recipes.begin() + m_displayed->m_idx );
+                m_displayed.reset();
                 break;
         }
     }
@@ -160,6 +166,11 @@ RecipeDisplayCtx::returned_t RecipeDisplayCtx::Render( const itemNameGetter_t & 
             if ( Button( language::b_saveCopy.data() ) )
             {
                 ret = returned_t::saveCopy;
+            }
+
+            if ( Button( language::b_removeRecipe.data() ) )
+            {
+                ret = returned_t::remove;
             }
 
             if ( Button( language::b_discard.data() ) )

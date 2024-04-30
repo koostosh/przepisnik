@@ -25,7 +25,8 @@ public:
         close,
         saveCopy,
         saveOverwrite,
-        reopen
+        reopen,
+        remove
     };
 
     RecipeDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter );

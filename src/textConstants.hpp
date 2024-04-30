@@ -15,6 +15,7 @@ namespace language
     constexpr std::string_view b_discard{ "Anuluj" };
     constexpr std::string_view b_save{ "Zapisz" };
     constexpr std::string_view b_saveCopy{ "Zapisz jako kopi\xc4\x99" };
+    constexpr std::string_view b_removeRecipe{ "Usu\xc5\x84"" przepis" };
 
     constexpr std::string_view newRecipeName{ "Nowy przepis" };
     constexpr std::string_view selectIngredient{ "Wybierz sk\xc5\x82""adnik" };
