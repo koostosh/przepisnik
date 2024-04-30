@@ -54,6 +54,11 @@ public:
 
     bool EndFrame() override
     {
+        if ( !m_fontLoaded )
+        {
+            ImGui::Begin( "Font not loaded correctly" );
+            ImGui::End();
+        }
         ImGui::Render();
 
         ImVec4 clear_color = ImVec4( 0.45f, 0.55f, 0.60f, 1.00f );
@@ -113,7 +118,8 @@ private:
             0x0020, 0x017F, // Basic Latin + Latin-1 Supplement + Latin Extended-A
             0,
         };
-        io.Fonts->AddFontFromFileTTF( "data/OpenSans-Medium.ttf", 15.0f, nullptr, fontRanges );
+        auto ptr = io.Fonts->AddFontFromFileTTF( "data/OpenSans-Medium.ttf", 15.0f, nullptr, fontRanges );
+        m_fontLoaded = ( ptr != nullptr );
     }
 
     template <typename T>
@@ -132,6 +138,7 @@ private:
     d3dPtr<IDXGISwapChain> m_swapChain;
     d3dPtr<ID3D11RenderTargetView> m_mainRenderTargetView;
     SDL_Window * m_sdlWindow;
+    bool m_fontLoaded;
 
     bool CreateDeviceD3D( HWND hWnd )
     {
