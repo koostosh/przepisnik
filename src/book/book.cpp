@@ -23,7 +23,7 @@ void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
     {
         PushID( i );
         if ( Selectable( recipe.name.c_str(), false ) )
-            m_displayed = std::make_unique<RecipleDisplayCtx>( recipe, i, ing, qGetter );
+            m_displayed = std::make_unique<RecipeDisplayCtx>( recipe, i, ing, qGetter );
         PopID();
         i++;
     }
@@ -33,18 +33,18 @@ void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
         auto returned = m_displayed->Render( ing );
         switch ( returned )
         {
-            case RecipleDisplayCtx::returned_t::close:
+            case RecipeDisplayCtx::returned_t::close:
                 m_displayed.reset();
                 break;
-            case RecipleDisplayCtx::returned_t::saveCopy:
+            case RecipeDisplayCtx::returned_t::saveCopy:
                 m_recipes.emplace_back( m_displayed->getRecipeCopy() );
                 break;
-            case RecipleDisplayCtx::returned_t::saveOverwrite:
+            case RecipeDisplayCtx::returned_t::saveOverwrite:
                 m_recipes[ m_displayed->m_idx ] = m_displayed->getRecipeCopy();
                 break;
-            case RecipleDisplayCtx::returned_t::reopen:
+            case RecipeDisplayCtx::returned_t::reopen:
                 if ( m_displayed->m_idx < m_recipes.size() )
-                    m_displayed = std::make_unique<RecipleDisplayCtx>( m_recipes[ m_displayed->m_idx ], m_displayed->m_idx, ing, qGetter );
+                    m_displayed = std::make_unique<RecipeDisplayCtx>( m_recipes[ m_displayed->m_idx ], m_displayed->m_idx, ing, qGetter );
                 break;
         }
     }
@@ -87,7 +87,7 @@ void Book::Save( nlohmann::json & j ) const
     }
 }
 
-RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter ) : m_r( r ), m_idx( idx ), m_ikc( ing )
+RecipeDisplayCtx::RecipeDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter ) : m_r( r ), m_idx( idx ), m_ikc( ing )
 {
     nameChanged();
     m_ingredients.reserve( r.ingredients.size() );
@@ -95,7 +95,7 @@ RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalo
         m_ingredients.emplace_back( std::format( "{}: {}/{}", ing[ element.first ].name, qGetter( element.first ), element.second ) );
 }
 
-RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t & ing )
+RecipeDisplayCtx::returned_t RecipeDisplayCtx::Render( const itemNameGetter_t & ing )
 {
     using namespace ImGui;
     bool stayOpen = true;
@@ -177,7 +177,7 @@ RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t 
     return stayOpen ? ret : returned_t::close;
 }
 
-void RecipleDisplayCtx::nameChanged()
+void RecipeDisplayCtx::nameChanged()
 {
     m_windowName = "Przepis: " + m_r.name + "###recipe";
 }

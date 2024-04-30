@@ -16,7 +16,7 @@ struct Recipe
     std::string instructions;
 };
 
-class RecipleDisplayCtx
+class RecipeDisplayCtx
 {
 public:
     enum class returned_t
@@ -28,7 +28,7 @@ public:
         reopen
     };
 
-    RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter );
+    RecipeDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter );
     returned_t Render( const itemNameGetter_t & ing );
 
     const size_t m_idx;
@@ -58,6 +58,6 @@ public:
     void Load( const nlohmann::json & j );
     void Save( nlohmann::json & j ) const;
 private:
-    std::unique_ptr<RecipleDisplayCtx> m_displayed;
+    std::unique_ptr<RecipeDisplayCtx> m_displayed;
     std::vector<Recipe> m_recipes;
 };
