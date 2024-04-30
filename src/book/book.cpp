@@ -11,7 +11,7 @@
 #include <format>
 #include <optional>
 
-void Book::Render( const Catalog & ing )
+void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
 {
     if ( Widgets::SButton( "+##add" ) )
     {
@@ -23,7 +23,7 @@ void Book::Render( const Catalog & ing )
     {
         PushID( i );
         if ( Selectable( recipe.name.c_str(), false ) )
-            m_displayed = std::make_unique<RecipleDisplayCtx>( recipe, i, ing );
+            m_displayed = std::make_unique<RecipleDisplayCtx>( recipe, i, ing, qGetter );
         PopID();
         i++;
     }
@@ -44,7 +44,7 @@ void Book::Render( const Catalog & ing )
                 break;
             case RecipleDisplayCtx::returned_t::reopen:
                 if ( m_displayed->m_idx < m_recipes.size() )
-                    m_displayed = std::make_unique<RecipleDisplayCtx>( m_recipes[ m_displayed->m_idx ], m_displayed->m_idx, ing );
+                    m_displayed = std::make_unique<RecipleDisplayCtx>( m_recipes[ m_displayed->m_idx ], m_displayed->m_idx, ing, qGetter );
                 break;
         }
     }
@@ -86,12 +86,12 @@ void Book::Save( nlohmann::json & j ) const
     }
 }
 
-RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing ) : m_r( r ), m_idx( idx ), m_ikc( ing )
+RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter ) : m_r( r ), m_idx( idx ), m_ikc( ing )
 {
     nameChanged();
     m_ingredients.reserve( r.ingredients.size() );
     for ( auto & element : r.ingredients )
-        m_ingredients.emplace_back( std::format( "{}: {}/{}", ing[ element.first ].name, 0u, element.second ) );
+        m_ingredients.emplace_back( std::format( "{}: {}/{}", ing[ element.first ].name, qGetter( element.first ), element.second ) );
 }
 
 RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t & ing )

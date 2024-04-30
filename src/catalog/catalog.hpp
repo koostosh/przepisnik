@@ -11,6 +11,7 @@
 typedef uint32_t Itemid_t;
 typedef uint32_t Itemquantity_t;
 typedef std::function<const std::string( Itemid_t )> itemNameGetter_t;
+typedef std::function<const Itemquantity_t( Itemid_t )> itemQuantityGetter_t;
 
 struct ItemKind
 {

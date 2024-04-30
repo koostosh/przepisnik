@@ -28,7 +28,7 @@ public:
         reopen
     };
 
-    RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing );
+    RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter );
     returned_t Render( const itemNameGetter_t & ing );
 
     const size_t m_idx;
@@ -53,7 +53,7 @@ public:
     {
     };
 
-    void Render( const Catalog & ing );
+    void Render( const Catalog & ing, const itemQuantityGetter_t & qGetter );
 
     void Load( const nlohmann::json & j );
     void Save( nlohmann::json & j ) const;

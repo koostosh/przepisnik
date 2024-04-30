@@ -49,6 +49,8 @@ public:
         byClosestDate,
         byClosestDateGrouped
     };
+
+    Itemquantity_t GetItemCount(Itemid_t id);
 private:
     void AddItem( Itemid_t type, std::chrono::year_month_day ymd );
     void Sort();

@@ -154,6 +154,14 @@ void Fridge::Save( nlohmann::json & j ) const
     }
 }
 
+Itemquantity_t Fridge::GetItemCount( Itemid_t id )
+{
+    return std::accumulate( m_contents.begin(), m_contents.end(), Itemquantity_t( 0 ), [id]( auto q, const Item & item )
+    {
+        return q + ( item.id == id ? item.quantity : 0 );
+    } );
+}
+
 void Fridge::AddItem( Itemid_t type, std::chrono::year_month_day ymd )
 {
     m_contents.emplace_back( type, 0u, ymd );
