@@ -53,18 +53,19 @@ void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
 void Book::Load( const nlohmann::json & j )
 {
     decltype( m_recipes ) recipes;
-    for ( auto & el : j[ "recipes" ] )
-    {
-        if ( el.is_null() )
-            continue;
-        auto & r = recipes.emplace_back();
-        r.name = el[ "name" ];
-        r.instructions = el[ "instructions" ];
-        r.seasoning = el[ "seasoning" ];
-        if ( el.contains( "ingredients" ) )
-            for ( auto & ing : el[ "ingredients" ] )
-                r.ingredients.emplace_back( ing[ "id" ].get<Itemid_t>(), ing[ "quantity" ].get<Itemquantity_t>() );
-    }
+    if ( j.contains( "recipes" ) )
+        for ( auto & el : j[ "recipes" ] )
+        {
+            if ( el.is_null() )
+                continue;
+            auto & r = recipes.emplace_back();
+            r.name = el[ "name" ];
+            r.instructions = el[ "instructions" ];
+            r.seasoning = el[ "seasoning" ];
+            if ( el.contains( "ingredients" ) )
+                for ( auto & ing : el[ "ingredients" ] )
+                    r.ingredients.emplace_back( ing[ "id" ].get<Itemid_t>(), ing[ "quantity" ].get<Itemquantity_t>() );
+        }
     // parsing successful
     m_recipes = std::move( recipes );
 }

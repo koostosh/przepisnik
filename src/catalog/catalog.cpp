@@ -8,13 +8,14 @@
 void Catalog::Load( const nlohmann::json & j )
 {
     decltype( m_itemKinds ) kinds;
-    for ( auto & el : j[ "kinds" ] )
-    {
-        if ( el.is_null() )
-            continue;
-        Itemid_t id = el[ "id" ];
-        kinds.emplace( id, ItemKind{ el[ "name" ], el[ "measurement" ] } );
-    }
+    if ( j.contains( "kinds" ) )
+        for ( auto & el : j[ "kinds" ] )
+        {
+            if ( el.is_null() )
+                continue;
+            Itemid_t id = el[ "id" ];
+            kinds.emplace( id, ItemKind{ el[ "name" ], el[ "measurement" ] } );
+        }
     // parsing successful
     m_itemKinds = std::move( kinds );
 }

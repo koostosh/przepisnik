@@ -133,15 +133,16 @@ void Fridge::AddItemByName( const std::string & name, std::chrono::year_month_da
 void Fridge::Load( const nlohmann::json & j )
 {
     decltype( m_contents ) contents;
-    for ( auto & el : j[ "kinds" ] )
-    {
-        if ( el.is_null() )
-            continue;
-        Itemid_t id = el[ "id" ];
-        if ( el.contains( "items" ) )
-            for ( auto & eli : el[ "items" ] )
-                contents.emplace_back( id, eli[ "quantity" ], std::chrono::sys_days( std::chrono::days( eli[ "expiration" ] ) ) );
-    }
+    if ( j.contains( "kinds" ) )
+        for ( auto & el : j[ "kinds" ] )
+        {
+            if ( el.is_null() )
+                continue;
+            Itemid_t id = el[ "id" ];
+            if ( el.contains( "items" ) )
+                for ( auto & eli : el[ "items" ] )
+                    contents.emplace_back( id, eli[ "quantity" ], std::chrono::sys_days( std::chrono::days( eli[ "expiration" ] ) ) );
+        }
     // parsing successful
     m_contents = std::move( contents );
 }
