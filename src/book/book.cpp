@@ -97,7 +97,7 @@ RecipleDisplayCtx::RecipleDisplayCtx( const Recipe & r, size_t idx, const Catalo
 RecipleDisplayCtx::returned_t RecipleDisplayCtx::Render( const itemNameGetter_t & ing )
 {
     using namespace ImGui;
-    bool stayOpen;
+    bool stayOpen = true;
     returned_t ret = returned_t::stayOpen;
     if ( Begin( m_windowName.c_str(), &stayOpen ) )
     {
