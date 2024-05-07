@@ -11,7 +11,7 @@
 #include <format>
 #include <optional>
 
-void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
+void Book::Render( const Catalog & ing, ItemQuantityControlerI & quant )
 {
     if ( Widgets::SButton( "+##add" ) )
     {
@@ -23,7 +23,7 @@ void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
     {
         PushID( i );
         if ( Selectable( recipe.name.c_str(), false ) )
-            m_displayed = std::make_unique<RecipeDisplayCtx>( recipe, i, ing, qGetter );
+            m_displayed = std::make_unique<RecipeDisplayCtx>( recipe, i, ing, quant );
         PopID();
         i++;
     }
@@ -46,11 +46,15 @@ void Book::Render( const Catalog & ing, const itemQuantityGetter_t & qGetter )
                 break;
             case RecipeDisplayCtx::returned_t::reopen:
                 if ( m_displayed->m_idx < m_recipes.size() )
-                    m_displayed = std::make_unique<RecipeDisplayCtx>( m_recipes[ m_displayed->m_idx ], m_displayed->m_idx, ing, qGetter );
+                    m_displayed = std::make_unique<RecipeDisplayCtx>( m_recipes[ m_displayed->m_idx ], m_displayed->m_idx, ing, quant );
                 break;
             case RecipeDisplayCtx::returned_t::remove:
                 m_recipes.erase( m_recipes.begin() + m_displayed->m_idx );
                 m_displayed.reset();
+                break;
+            case RecipeDisplayCtx::returned_t::subtractIngredients:
+                for ( auto & [item, amount] : m_recipes[ m_displayed->m_idx ].ingredients )
+                    quant.TryRemove( item, amount );
                 break;
         }
     }
@@ -93,12 +97,12 @@ void Book::Save( nlohmann::json & j ) const
     }
 }
 
-RecipeDisplayCtx::RecipeDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter ) : m_r( r ), m_idx( idx ), m_ikc( ing )
+RecipeDisplayCtx::RecipeDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const ItemQuantityControlerI & quant ) : m_r( r ), m_idx( idx ), m_ikc( ing )
 {
     nameChanged();
     m_ingredients.reserve( r.ingredients.size() );
     for ( auto & element : r.ingredients )
-        m_ingredients.emplace_back( std::format( "{}: {}/{}", ing[ element.first ].name, qGetter( element.first ), element.second ) );
+        m_ingredients.emplace_back( std::format( "{}: {}/{}", ing[ element.first ].name, quant.Get( element.first ), element.second ) );
 }
 
 RecipeDisplayCtx::returned_t RecipeDisplayCtx::Render( const itemNameGetter_t & ing )
@@ -184,6 +188,17 @@ RecipeDisplayCtx::returned_t RecipeDisplayCtx::Render( const itemNameGetter_t & 
             TextWrapped( m_r.seasoning.c_str() );
             if ( Button( language::b_edit.data() ) )
                 edit = true;
+            if ( ingredientsUsed )
+            {
+                BeginDisabled();
+                Button( language::b_useIngredients.data() );
+                EndDisabled();
+            }
+            else if ( Button( language::b_useIngredients.data() ) )
+            {
+                ret = returned_t::subtractIngredients;
+                ingredientsUsed = true;
+            }
         }
     }
     End();

@@ -19,7 +19,6 @@ int WinMain( int, char ** )
     Fridge edigarian( avon );
     Book newBraveWorld;
     std::ifstream loadFile( otherConstants::mainFilename );
-    itemQuantityGetter_t qGetter = std::bind( &Fridge::GetItemCount, &edigarian, std::placeholders::_1 );
     try
     {
         nlohmann::json j;
@@ -51,7 +50,7 @@ int WinMain( int, char ** )
 
         ImGui::SetNextWindowSize( { 300,300 }, ImGuiCond_FirstUseEver );
         ImGui::Begin( language::bookWindowName.data() );
-        newBraveWorld.Render( avon, qGetter );
+        newBraveWorld.Render( avon, edigarian );
         ImGui::End();
 
         running &= app->EndFrame();

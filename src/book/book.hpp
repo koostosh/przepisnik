@@ -26,10 +26,11 @@ public:
         saveCopy,
         saveOverwrite,
         reopen,
-        remove
+        remove,
+        subtractIngredients
     };
 
-    RecipeDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const itemQuantityGetter_t & qGetter );
+    RecipeDisplayCtx( const Recipe & r, size_t idx, const Catalog & ing, const ItemQuantityControlerI & quant );
     returned_t Render( const itemNameGetter_t & ing );
 
     const size_t m_idx;
@@ -45,6 +46,7 @@ private:
     Itemquantity_t m_countToBeAdded = 0;
     Widgets::ItemKindCombo m_ikc;
     bool edit = false;
+    bool ingredientsUsed = false;
 };
 
 class Book
@@ -54,7 +56,7 @@ public:
     {
     };
 
-    void Render( const Catalog & ing, const itemQuantityGetter_t & qGetter );
+    void Render( const Catalog & ing, ItemQuantityControlerI & quant );
 
     void Load( const nlohmann::json & j );
     void Save( nlohmann::json & j ) const;

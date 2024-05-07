@@ -31,7 +31,7 @@ namespace Widgets
     };
 }
 
-class Fridge
+class Fridge : public ItemQuantityControlerI
 {
 public:
     Fridge(Catalog & catalog);
@@ -50,7 +50,8 @@ public:
         byClosestDateGrouped
     };
 
-    Itemquantity_t GetItemCount(Itemid_t id);
+    Itemquantity_t Get( Itemid_t id ) const override;
+    void TryRemove( Itemid_t id, Itemquantity_t amount ) override;
 private:
     void AddItem( Itemid_t type, std::chrono::year_month_day ymd );
     void Sort();

@@ -1,26 +1,13 @@
 
 #pragma once
 
+#include "types.hpp"
+
 #include <nlohmann/json_fwd.hpp>
 
 #include <cstdint>
 #include <functional>
 #include <map>
-#include <string>
-
-typedef uint32_t Itemid_t;
-typedef uint32_t Itemquantity_t;
-typedef std::function<const std::string( Itemid_t )> itemNameGetter_t;
-typedef std::function<const Itemquantity_t( Itemid_t )> itemQuantityGetter_t;
-
-struct ItemKind
-{
-    std::string name;
-    enum class measurement_t
-    {
-        pcs, grams, custom
-    } measurement;
-};
 
 class Catalog;
 namespace Widgets

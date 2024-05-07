@@ -155,11 +155,39 @@ void Fridge::Save( nlohmann::json & j ) const
     }
 }
 
-Itemquantity_t Fridge::GetItemCount( Itemid_t id )
+Itemquantity_t Fridge::Get( Itemid_t id ) const
 {
     return std::accumulate( m_contents.begin(), m_contents.end(), Itemquantity_t( 0 ), [id]( auto q, const Item & item )
     {
         return q + ( item.id == id ? item.quantity : 0 );
+    } );
+}
+
+void Fridge::TryRemove( Itemid_t id, Itemquantity_t amount)
+{
+    std::vector<std::pair<std::chrono::year_month_day, size_t>> positions;
+    for ( size_t i = 0; i < m_contents.size(); ++i )
+    {
+        if ( m_contents[ i ].id == id )
+            positions.emplace_back( m_contents[ i ].expiration, i );
+    }
+    std::ranges::sort( positions, {}, &std::pair<std::chrono::year_month_day, size_t>::first );
+    for ( auto [ymd, i] : positions )
+    {
+        if ( m_contents[ i ].quantity >= amount )
+        {
+            m_contents[ i ].quantity -= amount;
+            break;
+        }
+        else
+        {
+            amount -= m_contents[ i ].quantity;
+            m_contents[ i ].quantity = 0;
+        }
+    }
+    std::erase_if( m_contents, [id](const auto & item)
+    {
+        return item.quantity == 0 && item.id == id;
     } );
 }
 
