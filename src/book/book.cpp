@@ -151,11 +151,11 @@ RecipeDisplayCtx::returned_t RecipeDisplayCtx::Render( const itemNameGetter_t & 
             EndTable();
         }
 
-        constexpr ImVec2 textSize( 0, 150 );
-        InputTextMultiline( "##seasoningText", &m_r.seasoning, textSize, edit ? 0 : ImGuiInputTextFlags_ReadOnly );
-        InputTextMultiline( "##instructionText", &m_r.instructions, textSize, edit ? 0 : ImGuiInputTextFlags_ReadOnly );
         if ( edit )
         {
+            constexpr ImVec2 textSize( -10, 150 );
+            InputTextMultiline( "##instructionText", &m_r.instructions, textSize );
+            InputTextMultiline( "##seasoningText", &m_r.seasoning, textSize );
             if ( InputText( "##name", &m_r.name ) )
                 nameChanged();
             if ( Button( language::b_save.data() ) )
@@ -180,6 +180,8 @@ RecipeDisplayCtx::returned_t RecipeDisplayCtx::Render( const itemNameGetter_t & 
         }
         else
         {
+            TextWrapped( m_r.instructions.c_str() );
+            TextWrapped( m_r.seasoning.c_str() );
             if ( Button( language::b_edit.data() ) )
                 edit = true;
         }
